@@ -3,14 +3,6 @@ import requests
 import uuid
 from cloudshell.cp.core.models import DeployAppResult, VmDetailsData, VmDetailsProperty, VmDetailsNetworkInterface
 
-
-#nutanix_host = '10.154.3.20'
-#nutanix_username = 'cidapiuser'
-#nutanix_password = 'C1dAp1user'
-#nutanix_rest_url = '/PrismGateway/services/rest/v2.0'
-#nutanix_base_url = 'https://' + nutanix_host + ':9440' + nutanix_rest_url
-
-
 class NutanixService:
 
     def __init__(self, nutanix_host, nutanix_username, nutanix_password):
@@ -23,16 +15,14 @@ class NutanixService:
         self.nutanix_base_url = 'https://' + nutanix_host + ':9440/PrismGateway/services/rest/v2.0'
 
     def can_connect(self):
-        '''ret = False
+        ret = False
 
         connect_url = self.nutanix_base_url + '/vms'
-        #connect_url = 'https://10.154.3.20:9440/PrismGateway/services/rest/v2.0'
 
         response = self.session.get(connect_url)
         if response.status_code == 200:
             ret = True
-        return ret'''
-        return True
+        return ret
 
     def deploy(self, vm_name, memory, vcpu, network_uuid, requested_ip):
         '''
