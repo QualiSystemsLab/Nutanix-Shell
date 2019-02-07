@@ -11,7 +11,7 @@ from cloudshell.shell.core.session.logging_session import LoggingSessionContext
 from cloudshell.core.context.error_handling_context import ErrorHandlingContext
 import json
 from data_model import *
-from nutanix_service import *
+from sdk.nutanix_service import *
 
 class NutanixshellDriver(ResourceDriverInterface):
 
