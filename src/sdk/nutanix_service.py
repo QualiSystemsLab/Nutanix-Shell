@@ -188,7 +188,8 @@ class NutanixService:
 
         return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data)
 
-    def get_vm_details(self, vm_uuid):
+    def get_vm_details(self, vm_name, vm_uuid):
+
         '''vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uuid + '?include_vm_nic_config=true'
         response = self.session.get(vm_detail_url)
         json_response = response.json()
@@ -199,61 +200,45 @@ class NutanixService:
             VmDetailsProperty(key='Instance Name', value=json_response['name'])
         ]
         vm_network_data = []
+        i = 0
 
         for nic in json_response['vm_nics']:
             network_data = [
                 VmDetailsProperty(key='MAC Address', value=nic['mac_address']),
             ]
 
-            current_interface = VmDetailsNetworkInterface(networkId=nic['network_uuid'],
+            current_interface = VmDetailsNetworkInterface(interfaceId=i,
+                                                          networkId=nic['network_uuid'],
+                                                          isPrimary=i == 0,
                                                           isPredefined=True,
                                                           networkData=network_data,
                                                           privateIpAddress=nic['ip_address'])
             vm_network_data.append(current_interface)
+            i += 1
 
         return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)'''
 
-        '''results = []
-        
-        for request in requests[u'items']:
-            vm_name = request[u'deployedAppJson'][u'name']
-            
-            vm_instance_data = self.extract_vm_instance_data()
-            vm_network_data = self.extract_vm_instance_network_data()
-            
-            result = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
-            results.append(result)
-            
-        return results'''
+        vm_instance_data = [
+            VmDetailsProperty(key='Instance Name', value=vm_name)
+        ]
 
-        results = []
+        network_data = [
+            VmDetailsProperty(key='Device Index', value=str(0)),
+            VmDetailsProperty(key='MAC Address', value=str(uuid.uuid4())),
+            VmDetailsProperty(key='Speed', value='1KB'),
+        ]
 
-        for request in requests[u'items']:
-            vm_name = request[u'deployedAppJson'][u'name']
+        vm_network_data = [VmDetailsNetworkInterface(interfaceId=0, networkId=0,
+                                                      isPrimary=True,
+                                                      # specifies whether nic is the primary interface
+                                                      isPredefined=False,
+                                                      # specifies whether network existed before reservation
+                                                      networkData=network_data,
+                                                      privateIpAddress='10.0.0.' + str(0),
+                                                      publicIpAddress='8.8.8.' + str(0))]
 
-            vm_instance_data = [
-                VmDetailsProperty(key='Instance Name', value=vm_name)
-            ]
+        return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
 
-            for i in range(1):
-                network_data = [
-                    VmDetailsProperty(key='Device Index', value=str(i)),
-                    VmDetailsProperty(key='MAC Address', value=str(uuid.uuid4())),
-                    VmDetailsProperty(key='Speed', value='1KB'),
-                ]
-
-                vm_network_data = [VmDetailsNetworkInterface(interfaceId=i, networkId=i,
-                                                              isPrimary=i == 0,
-                                                              # specifies whether nic is the primary interface
-                                                              isPredefined=False,
-                                                              # specifies whether network existed before reservation
-                                                              networkData=network_data,
-                                                              privateIpAddress='10.0.0.' + str(i),
-                                                              publicIpAddress='8.8.8.' + str(i))]
-                result = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
-                results.append(result)
-
-        return results
 
     def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip):
         '''vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uid + '?include_vm_nic_config=true'
@@ -261,7 +246,7 @@ class NutanixService:
         json_response = response.json()
 
         queried_private_ip = json_response['vm_nics'][0]['ip_address']
-        queried_public_ip = ''
+        queried_public_ip = None
 
         if app_private_ip != queried_private_ip:
             cloudshell_session.UpdateResourceAddress(app_fullname, queried_private_ip)
