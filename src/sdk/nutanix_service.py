@@ -3,6 +3,7 @@ import requests
 import uuid
 from cloudshell.cp.core.models import DeployAppResult, VmDetailsData, VmDetailsProperty, VmDetailsNetworkInterface
 
+
 class NutanixService:
 
     def __init__(self, nutanix_host, nutanix_username, nutanix_password):
@@ -48,7 +49,7 @@ class NutanixService:
         pass
 
     def clone_vm(self, deploy_action):
-        '''vm_unique_name = deploy_action.actionParams.appName + '__' + str(uuid.uuid4())[:6]
+        vm_unique_name = deploy_action.actionParams.appName + '__' + str(uuid.uuid4())[:6]
         source_vm_uuid = deploy_action.actionParams.deployment.attributes["Nutanixshell.Nutanix_Clone_From_VM.Cloned VM UUID"]
         storage_uuid = deploy_action.actionParams.deployment.attributes["Nutanixshell.Nutanix_Clone_From_VM.Storage Container UUID"]
 
@@ -80,75 +81,33 @@ class NutanixService:
                                vmUuid=vm_uuid,
                                vmName=vm_unique_name,
                                deployedAppAddress=vm_details_data.vmNetworkData[0].privateIpAddress,
-                               vmDetailsData=vm_details_data)'''
-        vm_name = 'TestApp__{}'.format(str(uuid.uuid4())[:6])
-        vm_instance_data = [
-            VmDetailsProperty(key='Instance Name', value=vm_name)
-        ]
-        for i in range(1):
-            network_data = [
-                VmDetailsProperty(key='Device Index', value=str(i)),
-                VmDetailsProperty(key='MAC Address', value=str(uuid.uuid4())),
-                VmDetailsProperty(key='Speed', value='1KB'),
-            ]
-
-            vm_network_data = [VmDetailsNetworkInterface(interfaceId=i, networkId=i,
-                                                          isPrimary=i == 0,
-                                                          # specifies whether nic is the primary interface
-                                                          isPredefined=False,
-                                                          # specifies whether network existed before reservation
-                                                          networkData=network_data,
-                                                          privateIpAddress='10.0.0.' + str(i),
-                                                          publicIpAddress='8.8.8.' + str(i))]
-        vm_details_data = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data)
-
-        return DeployAppResult(actionId=deploy_action.actionId,
-                               success=True,
-                               vmUuid='123456',
-                               vmName=vm_name,
-                               deployedAppAddress='1.2.3.4',
                                vmDetailsData=vm_details_data)
 
-    '''def clone_vm(self, source_vm_uuid, target_storage_container_uuid, target_vm_name):
-        clone_vm_url = self.nutanix_base_url + '/vms/' + source_vm_uuid + '/clone'
-        data = {"spec_list": [{"name": target_vm_name}],
-                "storage_container_uuid": target_storage_container_uuid,
-                "uuid": source_vm_uuid
-                }
-        json_data = json.dumps(data)
-        response = self.session.post(clone_vm_url, data=json_data)
-        json_response = response.json()
-        return json_response['task_uuid']
-    '''
-
     def delete_vm(self, vm_uuid):
-        '''delete_vm_url = self.nutanix_base_url + '/vms/' + vm_uuid + '/?delete_snapshots=true'
+        delete_vm_url = self.nutanix_base_url + '/vms/' + vm_uuid + '/?delete_snapshots=true'
         response = self.session.delete(delete_vm_url)
         json_response = response.json()
-        return json_response['task_uuid']'''
-        pass
+        return json_response['task_uuid']
 
     def set_power_on(self, vm_uuid):
-        '''set_power_url = self.nutanix_base_url + '/vms/' + vm_uuid + '/set_power_state/'
+        set_power_url = self.nutanix_base_url + '/vms/' + vm_uuid + '/set_power_state/'
         data = {"transition": "ON",
                 "uuid": vm_uuid
                 }
         json_data = json.dumps(data)
         response = self.session.post(set_power_url, data=json_data)
         json_response = response.json()
-        return json_response['task_uuid']'''
-        pass
+        return json_response['task_uuid']
 
     def set_power_off(self, vm_uuid):
-        '''set_power_url = self.nutanix_base_url + '/vms/' + vm_uuid + '/set_power_state/'
+        set_power_url = self.nutanix_base_url + '/vms/' + vm_uuid + '/set_power_state/'
         data = {"transition": "OFF",
                 "uuid": vm_uuid
                 }
         json_data = json.dumps(data)
         response = self.session.post(set_power_url, data=json_data)
         json_response = response.json()
-        return json_response['task_uuid']'''
-        pass
+        return json_response['task_uuid']
 
     def extract_vm_details(self, vm_uuid):
         vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uuid + '?include_vm_nic_config=true'
@@ -180,7 +139,7 @@ class NutanixService:
 
     def get_vm_details(self, vm_name, vm_uuid):
 
-        '''vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uuid + '?include_vm_nic_config=true'
+        vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uuid + '?include_vm_nic_config=true'
         response = self.session.get(vm_detail_url)
         json_response = response.json()
 
@@ -206,32 +165,10 @@ class NutanixService:
             vm_network_data.append(current_interface)
             i += 1
 
-        return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)'''
-
-        vm_instance_data = [
-            VmDetailsProperty(key='Instance Name', value=vm_name)
-        ]
-
-        network_data = [
-            VmDetailsProperty(key='Device Index', value=str(0)),
-            VmDetailsProperty(key='MAC Address', value=str(uuid.uuid4())),
-            VmDetailsProperty(key='Speed', value='1KB'),
-        ]
-
-        vm_network_data = [VmDetailsNetworkInterface(interfaceId=0, networkId=0,
-                                                      isPrimary=True,
-                                                      # specifies whether nic is the primary interface
-                                                      isPredefined=False,
-                                                      # specifies whether network existed before reservation
-                                                      networkData=network_data,
-                                                      privateIpAddress='10.0.0.' + str(0),
-                                                      publicIpAddress='8.8.8.' + str(0))]
-
         return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
 
-
     def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip):
-        '''vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uid + '?include_vm_nic_config=true'
+        vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uid + '?include_vm_nic_config=true'
         response = self.session.get(vm_detail_url)
         json_response = response.json()
 
@@ -242,10 +179,7 @@ class NutanixService:
             cloudshell_session.UpdateResourceAddress(app_fullname, queried_private_ip)
 
         if not app_public_ip or app_public_ip != queried_public_ip:
-            cloudshell_session.UpdateResourceAddress(app_fullname, "Public IP", queried_public_ip)'''
-
-        if app_private_ip != '1.2.3.4':
-            cloudshell_session.UpdateResourceAddress(app_fullname, '1.2.3.4')
+            cloudshell_session.UpdateResourceAddress(app_fullname, "Public IP", queried_public_ip)
 
     def vm_uuid_from_name(self, vm_name):
         list_of_vms = self.list_vms()

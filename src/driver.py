@@ -1,17 +1,15 @@
 from cloudshell.cp.core import DriverRequestParser
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.cp.core.utils import single, first_or_default
-from cloudshell.cp.core.models import DriverResponse
 from cloudshell.shell.core.driver_context import InitCommandContext, AutoLoadCommandContext, ResourceCommandContext, \
-    AutoLoadAttribute, AutoLoadDetails, CancellationContext, ResourceRemoteCommandContext
-from cloudshell.cp.core.models import DriverResponse, DeployApp, DeployAppResult, PrepareCloudInfra, CreateKeys, \
-    PrepareSubnet, RemoveVlan, SetVlan
+    AutoLoadDetails, CancellationContext, ResourceRemoteCommandContext
+from cloudshell.cp.core.models import DriverResponse, DeployApp
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.shell.core.session.logging_session import LoggingSessionContext
 from cloudshell.core.context.error_handling_context import ErrorHandlingContext
-import json
 from data_model import *
 from sdk.nutanix_service import *
+
 
 class NutanixshellDriver(ResourceDriverInterface):
 
@@ -24,7 +22,7 @@ class NutanixshellDriver(ResourceDriverInterface):
 
     def initialize(self, context):
         """
-        Initialize the driver session, this function is called everytime a new instance of the driver is created
+        Initialize the driver session, this function is called every time a new instance of the driver is created
         This is a good place to load and cache the driver configuration, initiate sessions etc.
         :param InitCommandContext context: the context the command runs on
         """
@@ -50,7 +48,8 @@ class NutanixshellDriver(ResourceDriverInterface):
 
                 decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
 
-                self.nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
+                self.nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user,
+                                                      decrypted_pass)
 
                 if not self.nutanix_service.can_connect():
                     raise ValueError('Could not connect: Check address and verify credentials: {}, {}, {}'.format(
