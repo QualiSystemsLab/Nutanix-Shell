@@ -86,6 +86,10 @@ class NutanixService:
     def delete_vm(self, vm_uuid):
         delete_vm_url = self.nutanix_base_url + '/vms/' + vm_uuid + '/?delete_snapshots=true'
         response = self.session.delete(delete_vm_url)
+
+        if response.status_code != 200:
+            raise StandardError("Unable to delete VM. uid: {}".format(vm_uuid))
+
         json_response = response.json()
         return json_response['task_uuid']
 
@@ -96,6 +100,10 @@ class NutanixService:
                 }
         json_data = json.dumps(data)
         response = self.session.post(set_power_url, data=json_data)
+
+        if response.status_code != 200:
+            raise StandardError("Unable to power on VM. uid: {}".format(vm_uuid))
+
         json_response = response.json()
         return json_response['task_uuid']
 
@@ -106,12 +114,20 @@ class NutanixService:
                 }
         json_data = json.dumps(data)
         response = self.session.post(set_power_url, data=json_data)
+
+        if response.status_code != 200:
+            raise StandardError("Unable to power off VM. uid: {}".format(vm_uuid))
+
         json_response = response.json()
         return json_response['task_uuid']
 
     def extract_vm_details(self, vm_uuid):
         vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uuid + '?include_vm_nic_config=true'
         response = self.session.get(vm_detail_url)
+
+        if response.status_code != 200:
+            raise StandardError("Unable to extract VM details. uid: {}".format(vm_uuid))
+
         json_response = response.json()
 
         vm_name = json_response['name']
@@ -141,6 +157,10 @@ class NutanixService:
 
         vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uuid + '?include_vm_nic_config=true'
         response = self.session.get(vm_detail_url)
+
+        if response.status_code != 200:
+            raise StandardError("Unable to get VM details. uid: {}".format(vm_uuid))
+
         json_response = response.json()
 
         vm_name = json_response['name']
@@ -170,6 +190,10 @@ class NutanixService:
     def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip):
         vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uid + '?include_vm_nic_config=true'
         response = self.session.get(vm_detail_url)
+
+        if response.status_code != 200:
+            raise StandardError("Unable to refresh VM ip. uid: {}".format(vm_uuid))
+
         json_response = response.json()
 
         queried_private_ip = json_response['vm_nics'][0]['ip_address']
