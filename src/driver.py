@@ -18,7 +18,6 @@ class NutanixshellDriver(ResourceDriverInterface):
         ctor must be without arguments, it is created with reflection at run time
         """
         self.request_parser = DriverRequestParser()
-        self.nutanix_service = None
 
     def initialize(self, context):
         """
@@ -48,12 +47,10 @@ class NutanixshellDriver(ResourceDriverInterface):
 
                 decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
 
-                self.nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user,
-                                                      decrypted_pass)
+                nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
 
-                if not self.nutanix_service.can_connect():
-                    raise ValueError('Could not connect: Check address and verify credentials: {}, {}, {}'.format(
-                        context.resource.address, cloud_provider_resource.user, decrypted_pass))
+                if not nutanix_service.can_connect():
+                    raise ValueError('Could not connect: Check address and verify credentials')
 
         return cloud_provider_resource.create_autoload_details()
 
@@ -72,24 +69,31 @@ class NutanixshellDriver(ResourceDriverInterface):
         """
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-            self._log(logger, 'deploy_request', request)
-            self._log(logger, 'deploy_context', context)
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'deploy_request', request)
+                self._log(logger, 'deploy_context', context)
 
-            # parse the json strings into action objects
-            actions = self.request_parser.convert_driver_request_to_actions(request)
+                cloud_provider_resource = Nutanixshell.create_from_context(context)
 
-            # extract DeployApp action
-            deploy_action = single(actions, lambda x: isinstance(x, DeployApp))
+                decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
 
-            # if we have multiple supported deployment options use the 'deploymentPath' property
-            # to decide which deployment option to use.
-            # deployment_name = deploy_action.actionParams.deployment.deploymentPath
+                nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
 
-            deploy_result = self.nutanix_service.clone_vm(deploy_action)
+                # parse the json strings into action objects
+                actions = self.request_parser.convert_driver_request_to_actions(request)
 
-            self._log(logger, 'deploy_result', deploy_result)
+                # extract DeployApp action
+                deploy_action = single(actions, lambda x: isinstance(x, DeployApp))
 
-            return DriverResponse([deploy_result]).to_driver_response_json()
+                # if we have multiple supported deployment options use the 'deploymentPath' property
+                # to decide which deployment option to use.
+                # deployment_name = deploy_action.actionParams.deployment.deploymentPath
+
+                deploy_result = nutanix_service.clone_vm(deploy_action)
+
+                self._log(logger, 'deploy_result', deploy_result)
+
+                return DriverResponse([deploy_result]).to_driver_response_json()
 
     def PowerOn(self, context, ports):
         """
@@ -99,13 +103,19 @@ class NutanixshellDriver(ResourceDriverInterface):
         """
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-            self._log(logger, 'power_on_context', context)
-            self._log(logger, 'power_on_ports', ports)
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'power_on_context', context)
+                self._log(logger, 'power_on_ports', ports)
+                cloud_provider_resource = Nutanixshell.create_from_context(context)
 
-            resource_ep = context.remote_endpoints[0]
-            deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
-            vm_uid = deployed_app_dict['vmdetails']['uid']
-            self.nutanix_service.set_power_on(vm_uid)
+                decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
+
+                nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
+
+                resource_ep = context.remote_endpoints[0]
+                deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
+                vm_uid = deployed_app_dict['vmdetails']['uid']
+                nutanix_service.set_power_on(vm_uid)
 
     def PowerOff(self, context, ports):
         """
@@ -115,13 +125,19 @@ class NutanixshellDriver(ResourceDriverInterface):
         """
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-            self._log(logger, 'power_off_context', context)
-            self._log(logger, 'power_off_ports', ports)
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'power_off_context', context)
+                self._log(logger, 'power_off_ports', ports)
+                cloud_provider_resource = Nutanixshell.create_from_context(context)
 
-            resource_ep = context.remote_endpoints[0]
-            deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
-            vm_uid = deployed_app_dict['vmdetails']['uid']
-            self.nutanix_service.set_power_off(vm_uid)
+                decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
+
+                nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
+
+                resource_ep = context.remote_endpoints[0]
+                deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
+                vm_uid = deployed_app_dict['vmdetails']['uid']
+                nutanix_service.set_power_off(vm_uid)
 
     def PowerCycle(self, context, ports, delay):
         pass
@@ -133,13 +149,19 @@ class NutanixshellDriver(ResourceDriverInterface):
         :param ports:
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-            self._log(logger, 'DeleteInstance_context', context)
-            self._log(logger, 'DeleteInstance_ports', ports)
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'DeleteInstance_context', context)
+                self._log(logger, 'DeleteInstance_ports', ports)
+                cloud_provider_resource = Nutanixshell.create_from_context(context)
 
-            resource_ep = context.remote_endpoints[0]
-            deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
-            vm_uid = deployed_app_dict['vmdetails']['uid']
-            self.nutanix_service.delete_vm(vm_uid)
+                decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
+
+                nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
+
+                resource_ep = context.remote_endpoints[0]
+                deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
+                vm_uid = deployed_app_dict['vmdetails']['uid']
+                nutanix_service.delete_vm(vm_uid)
 
     def GetVmDetails(self, context, requests, cancellation_context):
         """
@@ -151,25 +173,31 @@ class NutanixshellDriver(ResourceDriverInterface):
         """
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-            self._log(logger, 'GetVmDetails_context', context)
-            self._log(logger, 'GetVmDetails_requests', requests)
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'GetVmDetails_context', context)
+                self._log(logger, 'GetVmDetails_requests', requests)
+                cloud_provider_resource = Nutanixshell.create_from_context(context)
 
-            results = []
+                decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
 
-            requests_loaded = json.loads(requests)
+                nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
 
-            for request in requests_loaded[u'items']:
-                vm_name = request[u'deployedAppJson'][u'name']
-                vm_uid = request[u'deployedAppJson'][u'vmdetails'][u'uid']
+                results = []
 
-                result = self.nutanix_service.get_vm_details(vm_name, vm_uid)
-                results.append(result)
+                requests_loaded = json.loads(requests)
 
-            result_json = json.dumps(results, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+                for request in requests_loaded[u'items']:
+                    vm_name = request[u'deployedAppJson'][u'name']
+                    vm_uid = request[u'deployedAppJson'][u'vmdetails'][u'uid']
 
-            self._log(logger, 'GetVmDetails_result', result_json)
+                    result = nutanix_service.get_vm_details(vm_name, vm_uid)
+                    results.append(result)
 
-            return result_json
+                result_json = json.dumps(results, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
+
+                self._log(logger, 'GetVmDetails_result', result_json)
+
+                return result_json
 
     def remote_refresh_ip(self, context, ports, cancellation_context):
         """
@@ -185,6 +213,11 @@ class NutanixshellDriver(ResourceDriverInterface):
                 self._log(logger, 'remote_refresh_ip_context', context)
                 self._log(logger, 'remote_refresh_ip_ports', ports)
                 self._log(logger, 'remote_refresh_ip_cancellation_context', cancellation_context)
+                cloud_provider_resource = Nutanixshell.create_from_context(context)
+
+                decrypted_pass = cloudshell_session.DecryptPassword(cloud_provider_resource.password).Value
+
+                nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
 
                 deployed_app_dict = json.loads(context.remote_endpoints[0].app_context.deployed_app_json)
                 remote_ep = context.remote_endpoints[0]
@@ -199,7 +232,7 @@ class NutanixshellDriver(ResourceDriverInterface):
                 deployed_app_fullname = remote_ep.fullname
                 vm_uid = deployed_app_dict['vmdetails']['uid']
 
-                self.nutanix_service.refresh_ip(cloudshell_session, deployed_app_fullname, vm_uid, deployed_app_private_ip, deployed_app_public_ip)
+                nutanix_service.refresh_ip(cloudshell_session, deployed_app_fullname, vm_uid, deployed_app_private_ip, deployed_app_public_ip)
 
     # </editor-fold>
 
@@ -252,6 +285,7 @@ class NutanixshellDriver(ResourceDriverInterface):
         logger.info(name)
         logger.info(obj)
 
-    def _is_primitive(self, thing):
+    @staticmethod
+    def _is_primitive(thing):
         primitive = (int, str, bool, float, unicode)
         return isinstance(thing, primitive)
