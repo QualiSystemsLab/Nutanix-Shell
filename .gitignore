@@ -105,3 +105,4 @@ venv.bak/
 
 .idea/*
 *.zip
+src/sdk/temp.py
