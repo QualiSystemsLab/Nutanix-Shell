@@ -49,7 +49,7 @@ class NutanixshellDriver(ResourceDriverInterface):
 
                 nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
 
-                if not nutanix_service.can_connect():
+                if not nutanix_service.can_connect(cloud_provider_resource.storage_container_uuid):
                     raise ValueError('Could not connect: Check address and verify credentials')
 
         return cloud_provider_resource.create_autoload_details()

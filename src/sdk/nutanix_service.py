@@ -16,14 +16,15 @@ class NutanixService:
 
         self.nutanix_base_url = 'https://' + nutanix_host + ':9440/PrismGateway/services/rest/v2.0'
 
-    def can_connect(self):
+    def can_connect(self, storage_uuid):
         ret = False
 
         connect_url = self.nutanix_base_url + '/vms'
 
         response = self.session.get(connect_url)
-        if response.status_code == 200:
-            ret = True
+        if response.status_code == 200 or response.status_code == 201:
+            ret = self.is_valid_storage(storage_uuid)
+
         return ret
 
     def deploy(self, vm_name, memory, vcpu, network_uuid, requested_ip):
@@ -253,6 +254,21 @@ class NutanixService:
         response = self.session.get(vm_url)
         json_response = response.json()
         return json_response['entities']
+
+    def is_valid_storage(self, storage_uuid):
+        ret = False
+        storage_container_url = self.nutanix_base_url + '/storage_containers/'
+        response = self.session.get(storage_container_url)
+
+        if response.status_code != 200 and response.status_code != 201:
+            raise StandardError("Unable to Verify Storage Container UUID. uid: {}".format(storage_uuid))
+
+        json_response = response.json()
+        for each in json_response['entities']:
+            if each['storage_container_uuid'] == storage_uuid:
+                ret = True
+                break
+        return ret
 
     #######################################################
     # Below are not needed for the default cloud provider #
