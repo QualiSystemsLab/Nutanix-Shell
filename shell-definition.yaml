@@ -76,7 +76,7 @@ node_types:
 
     artifacts:
       icon:
-        file: shell-icon.png
+        file: nutanix_logo.jpg
         type: tosca.artifacts.File
       driver:
         file: NutanixshellDriver.zip
