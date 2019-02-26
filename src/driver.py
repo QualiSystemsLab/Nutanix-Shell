@@ -89,7 +89,7 @@ class NutanixshellDriver(ResourceDriverInterface):
                 # to decide which deployment option to use.
                 # deployment_name = deploy_action.actionParams.deployment.deploymentPath
 
-                deploy_result = nutanix_service.clone_vm(deploy_action)
+                deploy_result = nutanix_service.clone_vm(deploy_action, cloud_provider_resource.storage_container_uuid)
 
                 self._log(logger, 'deploy_result', deploy_result)
 

@@ -4,7 +4,7 @@ metadata:
   template_name: Nutanixshell
   template_author: Anonymous
   template_version: 0.1.0
-  template_icon: shell-icon.png
+  template_icon: nutanix_logo.jpg
 
 description: >
   sample deployment path file
@@ -23,12 +23,6 @@ node_types:
             description: "The id of the VM or Snapshot the App will be cloned from."
             default: ''
             tags: [user_input, editable_only_in_app_template]
-        Storage Container UUID:
-            type: string
-            description: "UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container."
-            default: ''
-            tags: [user_input, editable_only_in_app_template]
-
 
     artifacts:
       icon:

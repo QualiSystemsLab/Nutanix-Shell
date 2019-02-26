@@ -48,10 +48,9 @@ class NutanixService:
         '''
         pass
 
-    def clone_vm(self, deploy_action):
+    def clone_vm(self, deploy_action, storage_uuid):
         vm_unique_name = deploy_action.actionParams.appName + '__' + str(uuid.uuid4())[:6]
         source_vm_uuid = deploy_action.actionParams.deployment.attributes["Nutanixshell.Nutanix_Clone_From_VM.Cloned VM UUID"]
-        storage_uuid = deploy_action.actionParams.deployment.attributes["Nutanixshell.Nutanix_Clone_From_VM.Storage Container UUID"]
 
         clone_vm_url = self.nutanix_base_url + '/vms/' + source_vm_uuid + '/clone'
 

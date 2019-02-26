@@ -185,6 +185,21 @@ class Nutanixshell(object):
         self.attributes['Nutanixshell.Password'] = value
 
     @property
+    def storage_container_uuid(self):
+        """
+        :rtype: str
+        """
+        return self.attributes['Nutanixshell.Storage Container UUID'] if 'Nutanixshell.Storage Container UUID' in self.attributes else None
+
+    @storage_container_uuid.setter
+    def storage_container_uuid(self, value=''):
+        """
+        UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container.
+        :type value: str
+        """
+        self.attributes['Nutanixshell.Storage Container UUID'] = value
+
+    @property
     def networking_type(self):
         """
         :rtype: str
@@ -371,21 +386,6 @@ class Nutanix_Clone_From_VM(object):
         :type value: str
         """
         self.attributes['Nutanixshell.Nutanix_Clone_From_VM.Cloned VM UUID'] = value
-
-    @property
-    def storage_container_uuid(self):
-        """
-        :rtype: str
-        """
-        return self.attributes['Nutanixshell.Nutanix_Clone_From_VM.Storage Container UUID'] if 'Nutanixshell.Nutanix_Clone_From_VM.Storage Container UUID' in self.attributes else None
-
-    @storage_container_uuid.setter
-    def storage_container_uuid(self, value=''):
-        """
-        UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container.
-        :type value: str
-        """
-        self.attributes['Nutanixshell.Nutanix_Clone_From_VM.Storage Container UUID'] = value
 
     @property
     def autoload(self):
