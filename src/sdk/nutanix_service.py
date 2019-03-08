@@ -2,6 +2,7 @@ import json
 import requests
 import uuid
 import time
+import re
 from cloudshell.cp.core.models import DeployAppResult, VmDetailsData, VmDetailsProperty, VmDetailsNetworkInterface
 
 
@@ -219,27 +220,38 @@ class NutanixService:
         return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
 
     def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip, ip_regex, timeout):
+        INTERVAL = 5
+        IP_V4_PATTERN = re.compile('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')
         vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uid + '?include_vm_nic_config=true'
-        in_progress = True
 
-        while in_progress:
+        time_elapsed = 0
+        is_ip_match = re.compile(ip_regex).match
+        ip = None
+        temp_ip = None
+
+        while time_elapsed < timeout and not ip:
             response = self.session.get(vm_detail_url)
             if response.status_code != 200 and response.status_code != 201:
-                raise StandardError("Unable to extract VM details. uid: {}".format(vm_uuid))
+                raise StandardError("Unable to query for IP. uid: {}".format(vm_uid))
             json_response = response.json()
+
             if 'vm_nics' in json_response and json_response['vm_nics'] != [] and 'ip_address' in json_response['vm_nics'][0]:
-                in_progress = False
-            else:
-                time.sleep(5)
+                temp_ip = json_response['vm_nics'][0]['ip_address']
 
-        queried_private_ip = json_response['vm_nics'][0]['ip_address']
-        queried_public_ip = None
+            if temp_ip:
+                if IP_V4_PATTERN.match(temp_ip) and is_ip_match(temp_ip):
+                    ip = temp_ip
 
-        if app_private_ip != queried_private_ip:
-            cloudshell_session.UpdateResourceAddress(app_fullname, queried_private_ip)
+            if not ip:
+                time_elapsed += INTERVAL
+                time.sleep(INTERVAL)
 
-        if not app_public_ip or app_public_ip != queried_public_ip:
-            cloudshell_session.SetAttributeValue(app_fullname, "Public IP", queried_public_ip)
+        if not ip:
+            raise ValueError('IP address of VM \'{0}\' could not be obtained during {1} seconds'
+                             .format(app_fullname, timeout))
+
+        if app_private_ip != ip:
+            cloudshell_session.UpdateResourceAddress(app_fullname, ip)
 
     def vm_uuid_from_name(self, vm_name):
         list_of_vms = self.list_vms()
