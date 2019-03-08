@@ -224,7 +224,11 @@ class NutanixshellDriver(ResourceDriverInterface):
                 deployed_app_private_ip = remote_ep.address
                 deployed_app_public_ip = None
 
-                public_ip_att = first_or_default(deployed_app_dict['attributes'], lambda x: x['name'] == 'Public IP')
+                resource_attributes = self._parse_attributes(deployed_app_dict['attributes'])
+
+                public_ip_att = self._get_custom_attribute(resource_attributes, 'Public IP', None)
+                ip_regex = self._get_custom_attribute(resource_attributes, 'IP Regex', '.*')
+                refresh_ip_timeout = self._get_custom_attribute(resource_attributes, 'Refresh IP Timeout', 600)
 
                 if public_ip_att:
                     deployed_app_public_ip = public_ip_att['value']
@@ -232,7 +236,8 @@ class NutanixshellDriver(ResourceDriverInterface):
                 deployed_app_fullname = remote_ep.fullname
                 vm_uid = deployed_app_dict['vmdetails']['uid']
 
-                nutanix_service.refresh_ip(cloudshell_session, deployed_app_fullname, vm_uid, deployed_app_private_ip, deployed_app_public_ip)
+                nutanix_service.refresh_ip(cloudshell_session, deployed_app_fullname, vm_uid, deployed_app_private_ip,
+                                           deployed_app_public_ip, ip_regex, refresh_ip_timeout)
 
     # </editor-fold>
 
