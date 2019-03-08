@@ -39,6 +39,10 @@ node_types:
             type: string
           Password:
             type: cloudshell.datatypes.Password
+          Storage Container UUID:
+            type: string
+            description: "UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container."
+            default: ''
 
 #          ## Attributes available from the cloud provider standard
 #          Region:
@@ -65,6 +69,10 @@ node_types:
         type: string
       Password:
         type: cloudshell.datatypes.Password
+      Storage Container UUID:
+        type: string
+        description: "UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container."
+        default: ''
 
     artifacts:
       icon:
