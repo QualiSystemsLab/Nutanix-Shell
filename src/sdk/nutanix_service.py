@@ -2,6 +2,7 @@ import json
 import requests
 import uuid
 from cloudshell.cp.core.models import DeployAppResult, VmDetailsData, VmDetailsProperty, VmDetailsNetworkInterface
+import re
 
 
 class NutanixService:
@@ -233,7 +234,17 @@ class NutanixService:
         return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
 
 
-    def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip):
+    def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip, ip_regex, timeout):
+        INTERVAL = 5
+        IP_V4_PATTERN = re.compile('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')
+
+        time_elapsed = 0
+        ip_regex = re.compile(ip_regex).match
+        ip = None
+
+
+
+
         '''vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uid + '?include_vm_nic_config=true'
         response = self.session.get(vm_detail_url)
         json_response = response.json()
