@@ -294,3 +294,21 @@ class NutanixshellDriver(ResourceDriverInterface):
     def _is_primitive(thing):
         primitive = (int, str, bool, float, unicode)
         return isinstance(thing, primitive)
+
+    @staticmethod
+    def _parse_attributes(attributes):
+        result = dict()
+
+        for each in attributes:
+            result[each['name']] = each['value']
+
+        return result
+
+    @staticmethod
+    def _get_custom_attribute(attributes, name, default):
+        result = default
+
+        if name in attributes:
+            result = attributes[name]
+
+        return result

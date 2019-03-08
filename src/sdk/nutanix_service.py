@@ -218,7 +218,7 @@ class NutanixService:
 
         return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
 
-    def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip):
+    def refresh_ip(self, cloudshell_session, app_fullname, vm_uid, app_private_ip, app_public_ip, ip_regex, timeout):
         vm_detail_url = self.nutanix_base_url + '/vms/' + vm_uid + '?include_vm_nic_config=true'
         in_progress = True
 
