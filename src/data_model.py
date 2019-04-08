@@ -185,19 +185,19 @@ class Nutanixshell(object):
         self.attributes['Nutanixshell.Password'] = value
 
     @property
-    def storage_container_uuid(self):
+    def storage_container_name(self):
         """
         :rtype: str
         """
-        return self.attributes['Nutanixshell.Storage Container UUID'] if 'Nutanixshell.Storage Container UUID' in self.attributes else None
+        return self.attributes['Nutanixshell.Storage Container Name'] if 'Nutanixshell.Storage Container Name' in self.attributes else None
 
-    @storage_container_uuid.setter
-    def storage_container_uuid(self, value=''):
+    @storage_container_name.setter
+    def storage_container_name(self, value=''):
         """
-        UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container.
+        Name of the storage container on which the customization config iso files should be created.
         :type value: str
         """
-        self.attributes['Nutanixshell.Storage Container UUID'] = value
+        self.attributes['Nutanixshell.Storage Container Name'] = value
 
     @property
     def networking_type(self):
