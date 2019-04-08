@@ -39,29 +39,10 @@ node_types:
             type: string
           Password:
             type: cloudshell.datatypes.Password
-          Storage Container UUID:
+          Storage Container Name:
             type: string
-            description: "UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container."
+            description: "Name of the storage container on which the customization config iso files should be created."
             default: ''
-
-#          ## Attributes available from the cloud provider standard
-#          Region:
-#            type: string
-#            default: ''
-#          Networks in use:
-#            type: string
-#            default: ''
-#          VLAN Type:
-#            type: string
-#            default: 'VLAN'
-#          Networking type:
-#            type: string
-#            default: 'L2'
-#
-#          ## Adding custom attributes to the cloud provider discovery form
-#          my_custom_attribute:
-#            type: string
-#            default:
 
 #    ## Custom attributes definition
     properties:
@@ -69,9 +50,9 @@ node_types:
         type: string
       Password:
         type: cloudshell.datatypes.Password
-      Storage Container UUID:
+      Storage Container Name:
         type: string
-        description: "UUID of the storage container on which the customization config iso files should be created. Must be provided when cluster has more than one container."
+        description: "Name of the storage container on which the customization config iso files should be created."
         default: ''
 
     artifacts:

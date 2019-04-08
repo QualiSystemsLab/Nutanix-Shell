@@ -49,7 +49,7 @@ class NutanixshellDriver(ResourceDriverInterface):
 
                 nutanix_service = NutanixService(context.resource.address, cloud_provider_resource.user, decrypted_pass)
 
-                if not nutanix_service.can_connect(cloud_provider_resource.storage_container_uuid):
+                if not nutanix_service.can_connect(cloud_provider_resource.storage_container_name):
                     raise ValueError('Could not connect: Check address and verify credentials')
 
         return cloud_provider_resource.create_autoload_details()
@@ -89,7 +89,7 @@ class NutanixshellDriver(ResourceDriverInterface):
                 # to decide which deployment option to use.
                 # deployment_name = deploy_action.actionParams.deployment.deploymentPath
 
-                deploy_result = nutanix_service.clone_vm(deploy_action, cloud_provider_resource.storage_container_uuid)
+                deploy_result = nutanix_service.clone_vm(deploy_action, cloud_provider_resource.storage_container_name)
 
                 self._log(logger, 'deploy_result', deploy_result)
 

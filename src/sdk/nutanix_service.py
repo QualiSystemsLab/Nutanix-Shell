@@ -17,14 +17,15 @@ class NutanixService:
 
         self.nutanix_base_url = 'https://' + nutanix_host + ':9440/PrismGateway/services/rest/v2.0'
 
-    def can_connect(self, storage_uuid):
+    def can_connect(self, storage_name):
         ret = False
 
         connect_url = self.nutanix_base_url + '/vms'
 
         response = self.session.get(connect_url)
         if response.status_code == 200 or response.status_code == 201:
-            ret = self.is_valid_storage(storage_uuid)
+            temp = self.get_storage_uuid(storage_name)
+            ret = True
 
         return ret
 
@@ -50,7 +51,8 @@ class NutanixService:
         '''
         pass
 
-    def clone_vm(self, deploy_action, storage_uuid):
+    def clone_vm(self, deploy_action, storage_name):
+        storage_uuid = self.get_storage_uuid(storage_name)
         vm_unique_name = deploy_action.actionParams.appName + '__' + str(uuid.uuid4())[:6]
         source_vm_uuid = deploy_action.actionParams.deployment.attributes["Nutanixshell.Nutanix_Clone_From_VM.Cloned VM UUID"]
 
@@ -267,19 +269,21 @@ class NutanixService:
         json_response = response.json()
         return json_response['entities']
 
-    def is_valid_storage(self, storage_uuid):
-        ret = False
+    def get_storage_uuid(self, storage_name):
+        ret = ''
         storage_container_url = self.nutanix_base_url + '/storage_containers/'
         response = self.session.get(storage_container_url)
 
         if response.status_code != 200 and response.status_code != 201:
-            raise StandardError("Unable to Verify Storage Container UUID. uid: {}".format(storage_uuid))
+            raise StandardError("Unable to Get Storage Container UUID. storage: {}".format(storage_name))
 
         json_response = response.json()
         for each in json_response['entities']:
-            if each['storage_container_uuid'] == storage_uuid:
-                ret = True
+            if each['name'] == storage_name:
+                ret = each['storage_container_uuid']
                 break
+        if ret == '':
+            raise StandardError("Unable to Get Storage Container UUID. storage: {}".format(storage_name))
         return ret
 
     #######################################################
