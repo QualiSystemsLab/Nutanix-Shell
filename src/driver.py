@@ -237,8 +237,6 @@ class NutanixshellDriver(ResourceDriverInterface):
                 #ip_regex = first_or_default(deployed_app_dict['attributes'], lambda x: x['name'] == 'IP Regex')['value']
                 #refresh_ip_timeout = first_or_default(deployed_app_dict['attributes'], lambda x: x['name'] == 'Refresh IP Timeout')['value']
 
-                cloudshell_session.WriteMessageToReservationOutput('2f694bd9-c5c8-43dc-aa90-ba5a7535c4d2', '{}, {}'.format(ip_regex, refresh_ip_timeout))
-
                 if public_ip_att:
                     deployed_app_public_ip = public_ip_att['value']
 
